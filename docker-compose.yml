@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  mysql-db:
+    container_name: mysql-db
+    image: idhitz/mysql:5.1.73
+    entrypoint: /entrypoint.sh
+    command: ["--defaults-file=/etc/mysql/my.cnf", "--user=mysql"]
+    environment:
+      TZ: ${TZ}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_HOST: ${MYSQL_ROOT_HOST}
+    volumes:
+      - ./docker-entrypoint.sh:/entrypoint.sh
+      - mysql-db-volume:/var/lib/mysql
+    ports:
+      - 3306:3306
+    logging:
+        options:
+            max-size: 100m
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    depends_on:
+      - mysql-db
+    image: nibrev/phpmyadmin-4.0.x
+    restart: always
+    ports:
+      - "8090:80"
+    environment:
+      TZ: Asia/Bangkok
+      PMA_HOST: mysql-db
+      PMA_USER: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    logging:
+        options:
+            max-size: 100m
+
+volumes:
+  mysql-db-volume:
